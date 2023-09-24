@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='svglite' width='777.60pt' height='1036.80pt' viewBox='0 0 777.60 1036.80'>
+<defs>
+  <style type='text/css'><![CDATA[
+    .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: #FFFFFF;'/>
+<defs>
+  <clipPath id='cpMC4wMHw3NzcuNjB8MC4wMHwxMDM2Ljgw'>
+    <rect x='0.00' y='0.00' width='777.60' height='1036.80' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHw3NzcuNjB8MC4wMHwxMDM2Ljgw)'>
+<rect x='0.00' y='0.00000000000023' width='777.60' height='1036.80' style='stroke-width: 1.07; stroke: #FFFFFF; fill: #FFFFFF;' />
+</g>
+<defs>
+  <clipPath id='cpOC4yMnw3NzIuMTJ8NS40OHwxMDI4LjU4'>
+    <rect x='8.22' y='5.48' width='763.90' height='1023.10' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpOC4yMnw3NzIuMTJ8NS40OHwxMDI4LjU4)'>
+<rect x='8.22' y='5.48' width='763.90' height='1023.10' style='stroke-width: 1.07; stroke: none; fill: #EBEBEB;' />
+<polygon points='694.72,151.02 733.78,151.02 733.70,151.02 734.04,151.01 734.38,150.94 734.71,150.82 735.01,150.64 735.28,150.42 735.51,150.16 735.70,149.87 735.83,149.55 735.91,149.21 735.94,148.86 735.94,148.86 735.94,138.07 735.94,138.07 735.91,137.73 735.83,137.39 735.70,137.07 735.51,136.77 735.28,136.51 735.01,136.29 734.71,136.12 734.38,136.00 734.04,135.93 733.78,135.91 694.72,135.91 694.98,135.93 694.63,135.91 694.28,135.96 693.95,136.05 693.64,136.20 693.35,136.40 693.10,136.64 692.89,136.92 692.73,137.23 692.62,137.56 692.56,137.90 692.56,138.07 692.56,148.86 692.56,148.69 692.56,149.04 692.62,149.38 692.73,149.71 692.89,150.02 693.10,150.30 693.35,150.54 693.64,150.74 693.95,150.88 694.28,150.98 694.63,151.02 ' style='stroke-width: 0.53; stroke: none; fill: #231C18;' />
+<text x='714.25' y='147.42' text-anchor='middle' style='font-size: 11.04px; fill: none; font-family: Arial;' textLength='36.19px' lengthAdjust='spacingAndGlyphs'>ggplot2</text>
+<text x='714.25' y='147.39' text-anchor='middle' style='font-size: 11.04px; font-style: italic; fill: #FFFFFF; fill-opacity: 0.87; font-family: Roboto Condensed;' textLength='32.47px' lengthAdjust='spacingAndGlyphs'>ggplot2</text>
+</g>
+<g clip-path='url(#cpMC4wMHw3NzcuNjB8MC4wMHwxMDM2Ljgw)'>
+</g>
+</svg>

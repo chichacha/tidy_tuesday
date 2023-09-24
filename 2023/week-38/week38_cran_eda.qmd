@@ -1,0 +1,297 @@
+---
+title: "Week 38 CRAN packages"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+## Using Quarto to do data exploration
+
+## Installing Libraries
+
+I didn't realize there's tidytuesdayR package to get the data swiftly from official repo on Github till today.
+
+```{r}
+
+library(tidyverse)
+library(janitor)
+library(ggforce)
+library(tidygraph)
+library(ggraph)
+library(tidytext)
+library(lubridate)
+library(gt)
+library(gtExtras)
+```
+
+## Getting the Data Set for Week 38 2023
+
+Loading up the dataset and augmenting few things
+
+```{r}
+
+tuesdata <- tidytuesdayR::tt_load('2023-09-19')
+names(tuesdata)
+## OR
+#tuesdata <- tidytuesdayR::tt_load(2023, week = 38)
+
+cran <- tuesdata$cran_20230905 |>
+  clean_names() 
+
+cran <- cran |> 
+  mutate(url = str_glue("https://CRAN.R-project.org/package={package}"),
+         package_url = str_glue("<a href='{url}'> {package} </a>"),
+         package_initial=str_to_upper(str_sub(package,1L,1L)),
+         package_name_len=str_count(package))
+
+authors <- tuesdata$package_authors |> 
+  clean_names()
+
+nodes <- tuesdata$cran_graph_nodes |>
+  clean_names()
+
+edges <- tuesdata$cran_graph_edges |>
+  clean_names()
+
+# Reconstruct a graph
+cran_graph <- tbl_graph(
+  nodes = nodes, edges = edges, directed = FALSE
+)
+
+cran_graph <- cran_graph |>
+  mutate(idx=row_number())
+
+cran_graph |> filter(str_detect(name,"Wickham"))
+
+cran_graph |> as_tibble() |>
+  count(dist2hw)
+
+
+cran |> skimr::skim()
+
+### Package with Long Names! 
+cran |> arrange(desc(package_name_len))  |>
+  select(package_url, description, title, published) |>
+  head(30) |>
+  gt() |>
+  fmt_markdown(package_url)
+```
+
+## Words used in Title & Description 
+
+```{r}
+
+names(cran)
+
+cran_detail <-cran |>
+  arrange(desc(published)) |>
+  group_by(package_url,package, package_initial) |>
+  summarise(title=first(title),
+            description=first(description),
+            last_published = max(published, na.rm=T))  |>
+  ungroup() |>
+  mutate(sentences = str_c(title, " ", description))
+
+
+cran_words <- cran_detail |>
+  unnest_tokens(output="word",input="sentences") |>
+  anti_join(stop_words) 
+
+cran_words_by_auth <-cran_words |> count(word,package,sort=T) |>
+  inner_join(authors |> group_by(package) |>
+               summarise(authors_list=list(authors_r),
+                         authors_cnt=n())) |>
+  unnest(authors_list) |>
+  mutate(n=n/authors_cnt) |> ## if package is co-authoured then we should weigh them?
+  count(authors_list,word,wt=n,sort=T) |>
+  bind_tf_idf(term=word,document=authors_list,n=n)
+
+
+cran_words_by_auth |> filter(str_detect(word,"tuesday")) |>
+  arrange(desc(tf_idf))
+
+cran |> filter(str_detect(str_c(title," ", description),
+                           regex("tidytuesday", ignore_case=T))) |>
+  select(package_url,title,description,published,authors_r) |>
+  gt() |>
+  fmt_markdown(package_url)
+```
+
+## CRAN package dealing with Japan 
+
+```{r}
+cran_japan <- cran |>
+  filter(str_detect(paste(title,description,package),regex("(japan|nihon)", ignore_case=T)))
+
+cran_japan |>
+  select(package_url,title,description,author, published) |>
+  gt() |>
+  fmt_markdown(package_url)
+```
+
+## CRAN package dealing with Color Palette in some way :)  
+
+```{r}
+cran_color <- cran |>
+  filter(str_detect(paste(title,description,package),regex("(colour|color)", ignore_case=T)) & str_detect(paste(title,description,package),regex("(palette)", ignore_case=T)))
+
+cran_color |>
+  select(package_url,title,description,author, published) |>
+  gt() |>
+  fmt_markdown(package_url)
+
+
+```
+
+## CRAN Packages Dependency
+
+```{r}
+cran_dependency <- cran |> select(package,depends,imports) |>
+  mutate(depends=replace_na(depends,""),
+         imports=replace_na(imports,"")) |>
+  mutate(relates=str_trim(str_c(depends,", ",imports))) |>
+  mutate(relates=str_split(relates,",")) |>
+  unnest(relates) |>
+  mutate(relates=str_trim(relates)) |>
+  filter(str_count(relates)>1) |>
+  filter(!str_detect(relates,"R (.+)")) |>
+  mutate(relates=str_trim(str_remove_all(relates,"\\(.+\\)"))) |>
+  mutate(relates=str_trim(str_remove_all(relates,"\\((\\\n|.)+\\)"))) |>
+  filter(!str_detect(relates,"^R$"))
+
+
+cran_color_e <-cran_dependency |> 
+  filter(package %in% cran_color$package) |>
+  select(package,relates) |> distinct()
+
+cran_color_n <- tibble(
+  name=c(cran_color_e$package,cran_color_e$relates) |> unique()
+  ) |> left_join(cran_detail |> select(name=package,title,description,last_published)) |>
+  mutate(in_package=name %in% cran_color_e$package)
+
+cran_color_e <-cran_color_e |> mutate(relates_pkg = relates %in% cran_color_e$package)
+
+cran_color_g <- tbl_graph(nodes=cran_color_n,edges=cran_color_e, directed=F)
+
+cran_color_g <- cran_color_g |>
+  mutate(grp_infomap=group_infomap(),
+         grp_edge_btwn=group_edge_betweenness(),
+         deg=centrality_degree())
+
+cran_color_g |> as_tibble() |>
+  group_by(grp_infomap) |>
+  summarise(pkgs=paste(name,collapse=", "),
+            cnt=n()) 
+
+### Original Layout 
+cran_color_g |>
+  ggraph("sugiyama") +
+  geom_edge_diagonal(edge_width=0.1) +
+  geom_node_point(aes(color=in_package)) +
+  geom_node_text(aes(label=name), family="Roboto Condensed", hjust="outwards") +
+  coord_flip()
+
+cran_color_layout <- cran_color_g |>
+  create_layout("sugiyama")
+
+
+
+### It's too crowded.  I'm brute-forcefully adjusting layout...
+cran_color_layout2 <-cran_color_layout |>
+  group_by(y) |>
+  mutate(x = scales::rescale(row_number(x), to=range(x))) |>
+  mutate(y=if_else(name=="ggplot2",5.8,y)) |>
+  mutate(x=if_else(name=="earthtones",107,x)) |>
+  mutate(x=if_else(name %in% c("earthtones","echogram","ggmap","geosphere","readHAC"),x-112,x)) |>
+  mutate(x=if_else(name=="ggplot2",100,x)) |>
+  ungroup()
+
+cran_color_e |> filter(relates=="ggplot2") |> pull(package) -> ggplot2_grp
+cran_color_e |> 
+  filter(!package %in% (cran_color_e |> filter(relates=="ggplot2") |> pull(package))) |>
+  pull(package)|> unique() -> not_ggplot2_grp
+
+#pal_mat <- ggthemes::tableau_color_pal("Hue Circle")(19) |> sample(size=19) |> farver::decode_colour() 
+
+# c("007f5f-2b9348-55a630-80b918-aacc00-bfd200-d4d700-dddf00-eeef20-ffff3f") |>
+#   str_split("-") |>
+#   unlist() -> col_chi
+
+ggthemes::tableau_color_pal("Tableau 10")(10) -> col_chi
+
+pal_mat <- col_chi |> farver::decode_colour()
+col_chi|> scales::show_col()
+  
+
+cran_color_layout$x |> range()
+
+
+
+cran_color_g |>
+  mutate(deg=centrality_degree()) |>
+  as_tibble() |> 
+  count(deg) |>
+  pull(deg) -> possible_deg_cnt
+
+
+draw_by_grp <- function(deg_cnt,...){
+  cran_color_g |>
+  activate(nodes) |>
+  mutate(x=cran_color_layout2$x, # use cran_color_layout if we want original
+         y=cran_color_layout2$y,
+         deg = centrality_degree(),
+         color=colourvalues::color_values(deg,pal_mat)
+         ) |>
+  arrange(in_package,desc(deg)) |>
+  #filter(in_package)|>
+  #filter(!in_package) |>
+  filter(deg > deg_cnt)|>
+  ggraph(layout="manual",x=x,y=y) +
+  geom_edge_diagonal(edge_width=0.3, 
+                     aes(color=I(.N()$color[to]),
+                         start_cap = label_rect(node1.name,fontface="bold",family="Roboto Condensed"), 
+                         end_cap = label_rect(node2.name, fontface="bold", family="Roboto Condensed")))+
+  geom_node_label(aes(fill=I(if_else(in_package,color,colorspace::darken(color,amount=0.85))),
+                      label=name), 
+                  color="transparent") +
+  geom_node_text(aes(label=name, fontface=if_else(in_package,"bold","italic"),
+                     color=I(if_else(in_package,"#000000de","#ffffffde"))), 
+                 family="Roboto Condensed") +
+  coord_flip(ylim=c(0,6),xlim=c(-10,112)) 
+  
+  #ggsave(str_glue("2023/week-38/output/cran_color_sugiyama_{deg_cnt}.png"), device=ragg::agg_png, width=9*1.2, height=12*1.2)
+  
+  ggsave(str_glue("2023/week-38/output/cran_color_sugiyama_{deg_cnt}.svg"), device=svglite::svglite, width=9*1.2, height=12*1.2)
+  
+  
+}
+
+
+draw_by_grp(deg_cnt=0)
+
+### draw by degree and produce separate images so I can combine them to make animation
+possible_deg_cnt <- unname(possible_deg_cnt)
+possible_deg_cnt[c(1:20)] |> rev() |> map(draw_by_grp)
+
+### I feel like there's just so much efficient way to make animation.. but I can't figure out how just yet...
+
+
+
+cran_color |> 
+  left_join(cran_color_g |> as_tibble() |> select(package=name,deg) |>
+              mutate(deg_color = colourvalues::color_values(deg,pal_mat))) |>
+  select(deg,deg_color,package_url,package,published,title,description,depends,imports) |>
+  mutate(package=str_glue("<h4><span style='background-color:{deg_color};color:{deg_color}'> ■ </span>  {package_url} 📦 </h4>")) |>
+  arrange(deg) |>
+  mutate(deg=if_else(is.na(deg),"Package with No Depenency - Not Included in Network Visualization",if_else(deg==1,"Package with 1 Dependency",str_c("Package with ",deg, " Dependencies")))) |>
+  group_by(deg) |>
+  gt() |>
+  fmt_markdown(c(package)) |> 
+  cols_hide(c(package_url, deg_color)) |>
+  gt_theme_538() |> 
+  tab_header(title="CRAN Package dealing with Colour Palettes",
+             subtitle="Week 38 TidyTuesday Data Visualization Challenge")
+
+
+```
