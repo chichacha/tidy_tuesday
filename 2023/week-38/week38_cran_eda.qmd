@@ -8,9 +8,11 @@ editor_options:
 
 ## Using Quarto to do data exploration
 
+Since I have not really played with .qmd file... I'm just trying to utilize instead of just scribbling down on r scripting file.
+
 ## Installing Libraries
 
-I didn't realize there's tidytuesdayR package to get the data swiftly from official repo on Github till today.
+I didn't realize there's tidytuesdayR package to get the data swiftly from official repo on Github till today!
 
 ```{r}
 
@@ -80,6 +82,8 @@ cran |> arrange(desc(package_name_len))  |>
 
 ## Words used in Title & Description 
 
+Just trying to get sense of data set. I don't know what I want to visualize yet :D
+
 ```{r}
 
 names(cran)
@@ -120,6 +124,8 @@ cran |> filter(str_detect(str_c(title," ", description),
 
 ## CRAN package dealing with Japan 
 
+Surprise to see 31 packages that includes word "japan" in description. Hmm, but knowing there's close to 20K packages out there. 31 is maybe too little...
+
 ```{r}
 cran_japan <- cran |>
   filter(str_detect(paste(title,description,package),regex("(japan|nihon)", ignore_case=T)))
@@ -131,6 +137,8 @@ cran_japan |>
 ```
 
 ## CRAN package dealing with Color Palette in some way :)  
+
+Because I am typically obsessed with color palette in general. I maybe able to discover some new packages, that I haven't heard of yet! I'm looking for any package with either title or description including "colour" and "palette" to narrow down. There are 104 packages. I think it's good amount to do some network visualization. :)
 
 ```{r}
 cran_color <- cran |>
@@ -146,7 +154,15 @@ cran_color |>
 
 ## CRAN Packages Dependency
 
+I'd say package has dependency if package name is listed under depends column or imports column. I'm not sure the difference between the 2. Depends sounds like it should only be listing R version or package that are pre-installed with R, where as imports would be other packages on CRAN?!
+
+I've googled and I have gotten following explanation, but now I'm confused to what it means when package is "attached" . 🤔\
+\
+`"The main difference is that a package you list in Imports will just be loaded when you use it, whereas a package you list in Depends will be attached when your package is attached. Unless there is a good reason otherwise, you should always list packages in Imports not Depends ."  (R Packages (2e) Chapter 10 Dependencies: Mindset and Background)`
+
 ```{r}
+
+### grrr.. yes I should try to tidy below up bit....  
 cran_dependency <- cran |> select(package,depends,imports) |>
   mutate(depends=replace_na(depends,""),
          imports=replace_na(imports,"")) |>
@@ -157,34 +173,45 @@ cran_dependency <- cran |> select(package,depends,imports) |>
   filter(str_count(relates)>1) |>
   filter(!str_detect(relates,"R (.+)")) |>
   mutate(relates=str_trim(str_remove_all(relates,"\\(.+\\)"))) |>
-  mutate(relates=str_trim(str_remove_all(relates,"\\((\\\n|.)+\\)"))) |>
+  ### I just realized that when you use . it means any character except \n
+  mutate(relates=str_trim(str_remove_all(relates,"\\((\\\n|.)+\\)"))) |> 
   filter(!str_detect(relates,"^R$"))
 
-
+### Create edge lists  
 cran_color_e <-cran_dependency |> 
   filter(package %in% cran_color$package) |>
   select(package,relates) |> distinct()
 
+###. Create node lists
 cran_color_n <- tibble(
   name=c(cran_color_e$package,cran_color_e$relates) |> unique()
   ) |> left_join(cran_detail |> select(name=package,title,description,last_published)) |>
   mutate(in_package=name %in% cran_color_e$package)
 
+### relates_pkg is a flag to say if dependent package also appears as packages of interest
 cran_color_e <-cran_color_e |> mutate(relates_pkg = relates %in% cran_color_e$package)
 
+### Use the edges and nodes and make them into tbl_graph object
 cran_color_g <- tbl_graph(nodes=cran_color_n,edges=cran_color_e, directed=F)
+
+
+### Just experimenting with group_xxx. 
+#### group_infomap = Infomap community finding = find community structure that minimizes the expected description length of a random walker trajectory...  hmmm.  
+#### group_edge_betweenness = Many networks consist of modules which are densely connected themselves but sparsely connected to other modules.  hmmm..  
 
 cran_color_g <- cran_color_g |>
   mutate(grp_infomap=group_infomap(),
          grp_edge_btwn=group_edge_betweenness(),
          deg=centrality_degree())
 
+### with infomap how did package clustered into group?
 cran_color_g |> as_tibble() |>
   group_by(grp_infomap) |>
   summarise(pkgs=paste(name,collapse=", "),
             cnt=n()) 
 
 ### Original Layout 
+#### I don't know the best way to pick layout type, I've tried kk, fr, stress, nicely, lgl etc.  I like Sugiyama the best for this.  
 cran_color_g |>
   ggraph("sugiyama") +
   geom_edge_diagonal(edge_width=0.1) +
@@ -192,12 +219,12 @@ cran_color_g |>
   geom_node_text(aes(label=name), family="Roboto Condensed", hjust="outwards") +
   coord_flip()
 
+### I want to save the coordinate because I want to use the layout as a base. 
 cran_color_layout <- cran_color_g |>
   create_layout("sugiyama")
 
+###  I'm brute-forcefully adjusting layout...  
 
-
-### It's too crowded.  I'm brute-forcefully adjusting layout...
 cran_color_layout2 <-cran_color_layout |>
   group_by(y) |>
   mutate(x = scales::rescale(row_number(x), to=range(x))) |>
@@ -223,10 +250,7 @@ ggthemes::tableau_color_pal("Tableau 10")(10) -> col_chi
 pal_mat <- col_chi |> farver::decode_colour()
 col_chi|> scales::show_col()
   
-
 cran_color_layout$x |> range()
-
-
 
 cran_color_g |>
   mutate(deg=centrality_degree()) |>
@@ -277,6 +301,13 @@ possible_deg_cnt[c(1:20)] |> rev() |> map(draw_by_grp)
 ### I feel like there's just so much efficient way to make animation.. but I can't figure out how just yet...
 
 
+```
+
+### Creating Table listing out 104 CRAN packages dealing with Colour Palette
+
+Trying to figure out how to use package gt :) https://gt.rstudio.com/reference/index.html
+
+```{r}
 
 cran_color |> 
   left_join(cran_color_g |> as_tibble() |> select(package=name,deg) |>
@@ -291,7 +322,8 @@ cran_color |>
   cols_hide(c(package_url, deg_color)) |>
   gt_theme_538() |> 
   tab_header(title="CRAN Package dealing with Colour Palettes",
-             subtitle="Week 38 TidyTuesday Data Visualization Challenge")
+             subtitle="Week 38 TidyTuesday Data Visualization Challenge") |>
+  gtsave("2023/week-38/output/cran_colour_palette_packages.html")
 
 
 ```
