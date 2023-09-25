@@ -1,12 +1,14 @@
 ### Week 38 2023
 
-Data Source: <https://github.com/rfordatascience/tidytuesday/tree/master/data/2023/2023-09-19>
+-   Data Source: <https://github.com/rfordatascience/tidytuesday/tree/master/data/2023/2023-09-19>
 
-Code: <https://github.com/chichacha/tidy_tuesday/blob/main/2023/week-38/week38_cran_eda.qmd>
+-   Code: <https://github.com/chichacha/tidy_tuesday/blob/main/2023/week-38/week38_cran_eda.qmd>
 
 ![](https://github.com/chichacha/tidy_tuesday/blob/main/2023/week-38/output/PNG/tidy_tuesday_wk38@2x.png?raw=true)
 
-### Packages 📦 with Word "Color" & "Palette" in Title or Description
+#### Packages 📦 with Word "Color" & "Palette" in Title or Description
+
+In the above visualization, you can see that package with same number of dependencies are colour-coded.
 
 | deg                                                               | package_names                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 |:-----------|:-----------------------------------------------------------|
