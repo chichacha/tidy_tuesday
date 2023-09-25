@@ -327,3 +327,25 @@ cran_color |>
 
 
 ```
+
+### Creating Table Listing Package Names in Visuals for README
+
+If you create README.md under sub-folders within your main Repository, it does get rendered nicely as README file on main repository page. Which I only realized now.
+
+I wanted to list out name of Packages that were shown in visuals in table format in README.md
+
+I've generated table with below code and copied over to README.md for now.
+
+```{r}
+
+cran_color |> 
+  left_join(cran_color_g |> as_tibble() |> select(package=name,deg) |>
+              mutate(deg_color = colourvalues::color_values(deg,pal_mat))) |>
+  select(deg,deg_color,package_url,package,published,title,description,depends,imports) |>
+  mutate(package=str_glue("{package_url} 📦")) |>
+  arrange(deg) |>
+  mutate(deg=if_else(is.na(deg),"Package with No Depenency - Not Included in Network Visualization",if_else(deg==1,"Package with 1 Dependency",str_c("Package with ",deg, " Dependencies")))) |>
+  group_by(deg) |>
+  summarise(package_names=paste(package, collapse=" / ")) %>%
+  knitr::kable("markdown") %>% clipr::write_clip()
+```
