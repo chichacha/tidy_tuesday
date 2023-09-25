@@ -3,28 +3,34 @@ title: "My Scratch Pad"
 subtitle: "Just trying to understand Quarto"
 execute:
   echo: false
+  warning: false
 editor_options: 
   chunk_output_type: console
 format: gfm
+fig-width: 10
+fig-height: 5
+fig-format: "svg"
 ---
 
 ## What is Quarto
 
 First I need to look up dictionary...
 
-quar·to. /ˈkwôrdō/
+Quarto
 
-*noun* **PRINTING**
+:   quar·to. /ˈkwôrdō/
 
-noun: **quarto**; symbol: **4to**
+    *noun* **PRINTING**
 
--   a size of book page resulting from folding each printed sheet into four leaves (eight pages).
+    noun: **quarto**; symbol: **4to**
 
-    -   a book of quarto size.
+    -   a size of book page resulting from folding each printed sheet into four leaves (eight pages).
 
-        plural noun: **quartos**
+        -   a book of quarto size.
 
-    -   a size of writing paper, 10 in. × 8 in. (254 × 203 mm).
+            plural noun: **quartos**
+
+        -   a size of writing paper, 10 in. × 8 in. (254 × 203 mm).
 
 ### What sort of Executable Cells Can I enter?
 
@@ -62,8 +68,7 @@ digraph LearningProcess {
 
 ```
 
-{mermaid} will let me enter Mermaid too. 
-Mermaid is often used with Markdown-based documents, and it is suitable for Simple Diagram. 
+{mermaid} will let me enter Mermaid too. Mermaid is often used with Markdown-based documents, and it is suitable for Simple Diagram.
 
 ```{mermaid}
 graph LR;
@@ -81,4 +86,18 @@ graph LR;
 
 ```
 
+### 🤩 / key let me insert things faster!
 
+```{r r_test, fig.height=12, fig.width=12}
+library(scales)
+library(tidyverse)
+
+c("5f0f40-9a031e-fb8b24-e36414-0f4c5c") |>
+  str_split("-") |>
+  unlist() -> col_pal
+
+n_col <-length(col_pal) + (length(col_pal)-1)*5
+col_pal2 <- colorRampPalette(str_c("#",col_pal))(n_col)
+
+col_pal2|> show_col()
+```
