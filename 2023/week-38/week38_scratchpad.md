@@ -44,16 +44,16 @@ Markdown-based documents, and it is suitable for Simple Diagram.
 
 ``` mermaid
 graph LR;
-  Learning[Start Learning] --&gt;|Confusion| Frustration[Frustration];
-  Frustration --&gt;|Breakdown| Breakdown[Breakdown];
-  Breakdown --&gt;|Google Everything| Google[Google Everything];
-  Breakdown --&gt;|Caffeine Overdose| Caffeine[Caffeine Overdose];
-  Breakdown --&gt;|Procrastination| Procrastination[Procrastination];
-  Google --&gt;|Repeat| Repeat[Repeat Steps 1-7];
-  Caffeine --&gt;|Repeat| Repeat;
-  Procrastination --&gt;|Repeat| Repeat;
-  Repeat --&gt;|Repeat| Learning;
-  Repeat --&gt;|Eventually| Success[Success!];
+  Learning[Start Learning] -->|Confusion| Frustration[Frustration];
+  Frustration -->|Breakdown| Breakdown[Breakdown];
+  Breakdown -->|Google Everything| Google[Google Everything];
+  Breakdown -->|Caffeine Overdose| Caffeine[Caffeine Overdose];
+  Breakdown -->|Procrastination| Procrastination[Procrastination];
+  Google -->|Repeat| Repeat[Repeat Steps 1-7];
+  Caffeine -->|Repeat| Repeat;
+  Procrastination -->|Repeat| Repeat;
+  Repeat -->|Repeat| Learning;
+  Repeat -->|Eventually| Success[Success!];
 
 
 ```
