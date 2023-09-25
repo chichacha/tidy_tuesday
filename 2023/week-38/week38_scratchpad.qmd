@@ -8,7 +8,7 @@ editor_options:
 format: gfm
 ---
 
-## What is Quarto 
+## What is Quarto
 
 First I need to look up dictionary...
 
@@ -29,5 +29,56 @@ noun: **quarto**; symbol: **4to**
 ### What sort of Executable Cells Can I enter?
 
 ```         
-If I'm using visual editor, from Insert I can insert  R, Python, Bash, Rcpp, SQL, D3, Stan, Julia , Mermaid, GraphViz
+If I'm using visual editor, from Insert I can insert  
+R, Python, Bash, Rcpp, SQL, D3, Stan, Julia , Mermaid, GraphViz
 ```
+
+### Ooohh! I can even enter GraphViz!
+
+{dot} will let me enter GraphViz!
+
+```{dot}
+digraph LearningProcess {
+  node [shape=box, style=filled, color="#264653", fontname="Roboto Condensed"];
+  
+  subgraph cluster_language {
+    label="Learning Language (Because Speaking Gibberish is Fun!)";
+    Learning -> Play -> FailALot -> Practice -> Mastery;
+  }
+  
+  subgraph cluster_technology {
+    label="Learning Technology (Because Breaking Stuff is a Hobby!)";
+    Learning -> Play -> FailALot -> Experiment -> Proficiency;
+  }
+  
+  Learning [label="Learn", shape=ellipse, color="#2a9d8f"];
+  Play [label="Play", shape=ellipse, color="#2a9d8f"];
+  FailALot [label="Fail A Lot", shape=ellipse, color="#e76f51"];
+  Practice [label="Practice", shape=ellipse, color="#2a9d8f"];
+  Mastery [label="Mastery", shape=ellipse, color="#2a9d8f"];
+  Experiment [label="Experiment", shape=ellipse, color="#2a9d8f"];
+  Proficiency [label="Proficiency", shape=ellipse, color="#2a9d8f"];
+}
+
+```
+
+{mermaid} will let me enter Mermaid too. 
+Mermaid is often used with Markdown-based documents, and it is suitable for Simple Diagram. 
+
+```{mermaid}
+graph LR;
+  Learning[Start Learning] -->|Confusion| Frustration[Frustration];
+  Frustration -->|Breakdown| Breakdown[Breakdown];
+  Breakdown -->|Google Everything| Google[Google Everything];
+  Breakdown -->|Caffeine Overdose| Caffeine[Caffeine Overdose];
+  Breakdown -->|Procrastination| Procrastination[Procrastination];
+  Google -->|Repeat| Repeat[Repeat Steps 1-7];
+  Caffeine -->|Repeat| Repeat;
+  Procrastination -->|Repeat| Repeat;
+  Repeat -->|Repeat| Learning;
+  Repeat -->|Eventually| Success[Success!];
+
+
+```
+
+
