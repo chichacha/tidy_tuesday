@@ -80,7 +80,7 @@ cran |> arrange(desc(package_name_len))  |>
   fmt_markdown(package_url)
 ```
 
-## Words used in Title & Description 
+## Words used in Title & Description
 
 Just trying to get sense of data set. I don't know what I want to visualize yet :D
 
@@ -122,7 +122,7 @@ cran |> filter(str_detect(str_c(title," ", description),
   fmt_markdown(package_url)
 ```
 
-## CRAN package dealing with Japan 
+## CRAN package dealing with Japan
 
 Surprise to see 31 packages that includes word "japan" in description. Hmm, but knowing there's close to 20K packages out there. 31 is maybe too little...
 
@@ -136,7 +136,7 @@ cran_japan |>
   fmt_markdown(package_url)
 ```
 
-## CRAN package dealing with Color Palette in some way :)  
+## CRAN package dealing with Color Palette in some way :)
 
 Because I am typically obsessed with color palette in general. I maybe able to discover some new packages, that I haven't heard of yet! I'm looking for any package with either title or description including "colour" and "palette" to narrow down. There are 104 packages. I think it's good amount to do some network visualization. :)
 
@@ -348,4 +348,16 @@ cran_color |>
   group_by(deg) |>
   summarise(package_names=paste(package, collapse=" / ")) %>%
   knitr::kable("markdown") %>% clipr::write_clip()
+```
+
+### Wordcloud2 of Colour Palette Packages on CRAN
+
+```{r}
+
+cran_words |> filter(package %in% cran_color$package) |>
+  count(word,sort=T) |>
+  head(100) |>
+  mutate(n=sqrt(n)) |>
+  wordcloud2::wordcloud2(rotateRatio=0, fontFamily="Roboto Condensed",
+                         color=sample(col_chi,size=100,replace=T))
 ```
